@@ -1,158 +1,109 @@
 'use client';
-import React, { useState } from 'react';
-import { ThemeColors } from '@/hooks/useThemeColor';
-import { CellData } from './types';
+import { useState } from 'react';
+import type { CellData } from './types';
+import type { ThemeColors } from '@/hooks/useThemeColor';
 
-interface DayCellProps {
+const SUN_COLOR = '#ef4444';
+
+interface Props {
   cell: CellData;
   theme: ThemeColors;
   onDayClick: (date: Date) => void;
   onDayHover: (date: Date) => void;
 }
 
-const TEXT_BODY  = '#333333'; // Mon–Fri day numbers — never changes
-const SUN_COLOR  = '#e53935'; // Sunday — fixed red (Indian calendar standard)
-
-const dotColor = (type: string) =>
-  type === 'national'    ? '#ef5350'
-  : type === 'religious' ? '#ff9800'
-  : type === 'regional'  ? '#ab47bc'
-  : '#66bb6a';
-
-const BORDER_COL = '#ebebeb';
-
-/**
- * Single calendar grid cell.
- *
- * Column colour rules:
- *   Sat → theme.accent       (photo-derived, changes per month)
- *   Sun → SUN_COLOR (#e53935, always fixed red)
- *   Mon–Fri → TEXT_BODY (#333333, always the same)
- *
- * Indicators:
- *   noteOnDate → underline on the day number
- *   holiday    → small coloured dot + hover tooltip
- */
-export default function DayCell({ cell, theme, onDayClick, onDayHover }: DayCellProps) {
+export default function DayCell({ cell, theme, onDayClick, onDayHover }: Props) {
   const [hovered, setHovered] = useState(false);
-  const {
-    day, date, isOther,
-    isStart, isEnd, isInRange, isToday,
-    isSat, isSun, noteOnDate,
-  } = cell;
+  const { day, date, isOther, isSat, isSun, isStart, isEnd, isInRange, isToday, noteOnDate } = cell;
 
-  // `holiday` may not be in older CellData snapshots — guard gracefully
-  const holiday = (cell as any).holiday ?? null;
-
-  const isSelected  = isStart || isEnd;
+  const isSelected = isStart || isEnd;
   const isSingleDay = isStart && isEnd;
 
-  // Band background
-  const cellBg = isSelected   ? theme.accentLight
-               : isInRange    ? theme.accentRange
-               : 'transparent';
+  // ── Band background (outer cell — forms the continuous range strip) ──────────
+  let bandBg = 'transparent';
+  if (isSelected) bandBg = theme.accentLight;
+  else if (isInRange) bandBg = theme.accentRange;
 
-  // Band border-radius (continuous MakeMyTrip style)
-  const bandRadius = isSingleDay ? '50%'
-                   : isStart     ? '50% 0 0 50%'
-                   : isEnd       ? '0 50% 50% 0'
-                   : isInRange   ? '0'
-                   : hovered && !isOther ? '8px' : '4px';
+  // ── Band border-radius (hotel booking range shape) ────────────────────────────
+  let bandRadius = '6px';
+  if (isSingleDay) bandRadius = '50%';
+  else if (isStart) bandRadius = '999px 0 0 999px';
+  else if (isEnd) bandRadius = '0 999px 999px 0';
+  else if (isInRange) bandRadius = '0';
 
-  // Number badge background
-  const numBg = isSelected ? theme.accentDark
-              : isToday    ? theme.accent
-              : 'transparent';
+  // ── Number badge background ───────────────────────────────────────────────────
+  let numBg = 'transparent';
+  if (isSelected) numBg = theme.accentDark;
+  else if (isToday) numBg = theme.accent;
+  else if (hovered && !isOther && !isInRange) numBg = '#f3f4f6';
 
-  // Number text colour — ONLY Sat / Sun differ; Mon–Fri always TEXT_BODY
-  const numColor = isSelected || isToday ? '#ffffff'
-                 : isSat                 ? theme.accent
-                 : isSun                 ? SUN_COLOR
-                 : isOther               ? '#d0d0d0'
-                 : TEXT_BODY;
+  // ── Number text color ─────────────────────────────────────────────────────────
+  let numColor = '#111827';
+  if (isSelected || isToday) numColor = '#ffffff';
+  else if (isOther) numColor = '#d1d5db';
+  else if (isSun) numColor = SUN_COLOR;
+  else if (isSat) numColor = theme.accent;
 
-  const interactive = !isOther;
+  // ── Notes dot color ───────────────────────────────────────────────────────────
+  const dotColor = isSelected || isToday ? 'rgba(255,255,255,0.85)' : theme.accent;
 
   return (
     <div
-      role={interactive ? 'button' : undefined}
-      tabIndex={interactive ? 0 : undefined}
-      aria-label={interactive ? String(day) : undefined}
+      role={!isOther ? 'button' : undefined}
+      tabIndex={!isOther ? 0 : undefined}
+      aria-label={!isOther ? String(day) : undefined}
       aria-pressed={isSelected || undefined}
-      onKeyDown={e => { if (interactive && e.key === 'Enter') onDayClick(date); }}
+      onKeyDown={e => { if (!isOther && e.key === 'Enter') onDayClick(date); }}
+      className="relative flex items-center justify-center"
       style={{
-        aspectRatio: '1', minHeight: '40px',
-        background: cellBg, borderRadius: bandRadius,
-        cursor: interactive ? 'pointer' : 'default',
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        position: 'relative',
-        transition: 'background 0.12s, border-radius 0.12s',
+        aspectRatio: '1',
+        minHeight: '40px',
+        background: bandBg,
+        borderRadius: bandRadius,
+        cursor: isOther ? 'default' : 'pointer',
+        transition: 'background 0.12s',
       }}
-      onClick={() => interactive && onDayClick(date)}
-      onMouseEnter={() => { if (interactive) { setHovered(true); onDayHover(date); } }}
+      onClick={() => !isOther && onDayClick(date)}
+      onMouseEnter={() => {
+        setHovered(true);
+        if (!isOther) onDayHover(date);
+      }}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Day number — hover ring, underline when note exists */}
+      {/* Number badge */}
       <span
         style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          width: '30px', height: '30px', borderRadius: '50%',
-          background: numBg, color: numColor,
-          fontSize: '12px',
-          fontWeight: (isToday || isSelected) ? 600 : 400,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '32px',
+          height: '32px',
+          borderRadius: '50%',
+          background: numBg,
+          color: numColor,
+          fontSize: '12.5px',
+          fontWeight: isSelected || isToday ? 600 : 400,
+          lineHeight: 1,
           transition: 'background 0.12s, color 0.12s',
-          outline: hovered && !isSelected && !isOther
-            ? `1.5px solid ${theme.accentRange}` : 'none',
-          outlineOffset: '1px',
-          // Notes indicator: underline on the number
-          textDecoration: noteOnDate ? 'underline' : 'none',
-          textDecorationColor: (isSelected || isToday)
-            ? 'rgba(255,255,255,0.85)'
-            : theme.accent,
-          textDecorationThickness: '2px',
-          textUnderlineOffset: '2px',
         }}
       >
         {day}
       </span>
 
-      {/* Holiday dot */}
-      {holiday && (
-        <span style={{
-          width: '3.5px', height: '3.5px', borderRadius: '50%',
-          background: isSelected ? 'rgba(255,255,255,0.85)' : dotColor(holiday.type),
-          marginTop: '1.5px', flexShrink: 0,
-        }} />
-      )}
-
-      {/* Holiday tooltip */}
-      {holiday && hovered && (
+      {/* Notes indicator dot */}
+      {noteOnDate && (
         <div
+          className="absolute"
           style={{
-            position: 'absolute', bottom: '100%', left: '50%',
+            bottom: '5px',
+            left: '50%',
             transform: 'translateX(-50%)',
-            marginBottom: '4px', zIndex: 50,
-            pointerEvents: 'none',
+            width: '4px',
+            height: '4px',
+            borderRadius: '50%',
+            background: dotColor,
           }}
-        >
-          <div style={{
-            background: '#fff', border: `1px solid ${BORDER_COL}`,
-            borderRadius: '7px', padding: '4px 9px',
-            fontSize: '9px', whiteSpace: 'nowrap',
-            color: '#444', boxShadow: '0 3px 12px rgba(0,0,0,0.13)',
-            textAlign: 'center',
-          }}>
-            <div style={{
-              color: dotColor(holiday.type), fontWeight: 700,
-              fontSize: '8px', letterSpacing: '0.6px',
-              textTransform: 'uppercase', marginBottom: '1px',
-            }}>
-              {holiday.type}
-            </div>
-            {holiday.name}
-          </div>
-        </div>
+        />
       )}
     </div>
   );

@@ -22,6 +22,15 @@
   }
 }
 
+/* Hero image: diagonal right edge on desktop (creates slanted separation from calendar) */
+@media (min-width: 768px) {
+  .hero-clip-desktop {
+    height: 100% !important;
+    min-height: 320px;
+    clip-path: polygon(0 0, 100% 0, 86% 100%, 0 100%);
+  }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 4px;
