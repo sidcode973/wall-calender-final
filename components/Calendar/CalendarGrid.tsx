@@ -29,7 +29,7 @@ export default function CalendarGrid({ cells, theme, onDayClick, onDayHover, onM
               letterSpacing: '0.6px',
               textTransform: 'uppercase',
               padding: '4px 0',
-              color: i === 5 ? theme.accent : i === 6 ? SUN_COLOR : '#9ca3af',
+              color: i === 5 ? theme.accent : i === 6 ? SUN_COLOR : '#6b7280',
             }}
           >
             {d.slice(0, 2)}

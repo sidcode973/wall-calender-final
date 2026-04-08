@@ -24,19 +24,17 @@ export default function HeroSection({ imageSrc, month, year, theme, onImageLoad 
         onLoad={e => onImageLoad(e.currentTarget)}
       />
 
-      {/* Dark gradient overlay for contrast */}
+      {/* Dark gradient overlay */}
       <div
         className="absolute inset-0"
-        style={{
-          background: 'linear-gradient(160deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.62) 100%)',
-        }}
+        style={{ background: 'linear-gradient(160deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.62) 100%)' }}
       />
 
-      {/* Colored accent band at bottom (theme color) */}
+      {/* Colored accent band at bottom */}
       <div
         className="absolute bottom-0 left-0 right-0"
         style={{
-          height: '100px',
+          height: '110px',
           background: `linear-gradient(to top, ${theme.accentDark}d0, transparent)`,
         }}
       />
@@ -44,24 +42,24 @@ export default function HeroSection({ imageSrc, month, year, theme, onImageLoad 
       {/* Month + Year text */}
       <div
         className="absolute text-white"
-        style={{
-          bottom: '32px',
-          left: '22px',
-          textShadow: '0 2px 16px rgba(0,0,0,0.55)',
-        }}
+        style={{ bottom: '32px', left: '22px', textShadow: '0 2px 16px rgba(0,0,0,0.6)' }}
       >
+        {/* Year — bold and clearly visible */}
         <div
           style={{
-            fontSize: '10px',
+            fontSize: '13px',
             letterSpacing: '4px',
-            fontWeight: 300,
-            opacity: 0.75,
+            fontWeight: 700,
+            opacity: 1,
             textTransform: 'uppercase',
-            marginBottom: '3px',
+            marginBottom: '4px',
+            fontFamily: 'var(--font-body)',
           }}
         >
           {year}
         </div>
+
+        {/* Month name */}
         <div
           style={{
             fontSize: '30px',
@@ -75,7 +73,7 @@ export default function HeroSection({ imageSrc, month, year, theme, onImageLoad 
         </div>
       </div>
 
-      {/* Mobile bottom: V-notch separating image from calendar */}
+      {/* Mobile: V-notch at bottom */}
       <svg
         className="absolute bottom-0 left-0 w-full md:hidden"
         viewBox="0 0 420 36"
