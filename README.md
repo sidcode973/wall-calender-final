@@ -15,10 +15,6 @@ A beautiful, fully interactive wall calendar built with **Next.js 14**, **TypeSc
 
 ### Extra Features
 - **Auto Theme Color** — dominant color is extracted from each month's hero image using a canvas-based pixel sampler. The accent, range highlight, and cell colors all update live when you navigate months
-- **Holiday Markers** — colored dots on dates with hover tooltips:
-  - 🔴 **Red** — Indian national holidays (Republic Day, Independence Day, Gandhi Jayanti, etc.)
-  - 🟠 **Orange** — Religious & cultural (Holi, Diwali, Eid, Christmas, etc.)
-  - 🟢 **Green** — International days (Women's Day, Earth Day, Yoga Day, etc.)
 - **Dark / Light Mode** — toggle in the toolbar, uses `next-themes` with system preference detection
 
 ---
@@ -128,4 +124,4 @@ wall-calendar/
 
 ## 🌐 Live Demo
 
-[Add your Vercel deployment URL here]
+[https://wall-calender-psi.vercel.app/]
