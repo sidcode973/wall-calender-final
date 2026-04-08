@@ -16,12 +16,6 @@ A polished, interactive wall calendar built with **Next.js 14**, **TypeScript**,
 ### Extra Features
 - **Auto Theme Color** — dominant color is extracted from each month's hero image using a canvas-based pixel sampler. The accent, range highlight, and cell colors all update live when you navigate months
 - **Holiday Markers** — colored dots on dates with hover tooltips:
-  - 🔴 **Red** — Indian national holidays (Republic Day, Independence Day, Gandhi Jayanti, etc.)
-  - 🟠 **Orange** — Religious & cultural (Holi, Diwali, Eid, Christmas, etc.)
-  - 🟢 **Green** — International days (Women's Day, Earth Day, Yoga Day, etc.)
-- **Dark / Light Mode** — toggle in the toolbar, uses `next-themes` with system preference detection
-
----
 
 ## 🛠 Tech Stack
 
