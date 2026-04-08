@@ -79,8 +79,8 @@ export default function NavBar({ month, year, onPrev, onNext, theme }: Props) {
           style={{
             marginLeft: '8px',
             fontSize: '11px',
-            fontWeight: 400,
-            color: '#9ca3af',
+            fontWeight: 700,
+            color: '#6b7280',
             letterSpacing: '2px',
           }}
         >

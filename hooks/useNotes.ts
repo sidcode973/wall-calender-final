@@ -15,7 +15,7 @@ function buildNoteKey(
   return `notes-range-${toKey(startDate)}-${toKey(endDate ?? startDate)}`;
 }
 
-/** Reads and writes the note for the currently selected date / range. */
+/** Reads, writes, and deletes the note for the currently selected date/range. */
 export function useNotes(
   startDate: Date | null,
   endDate: Date | null,
@@ -35,16 +35,15 @@ export function useNotes(
     try { localStorage.setItem(key, val); } catch {}
   }, [key]);
 
-  return { note, saveNote };
+  const deleteNote = useCallback(() => {
+    setNote('');
+    try { localStorage.removeItem(key); } catch {}
+  }, [key]);
+
+  return { note, saveNote, deleteNote };
 }
 
-/**
- * Scans localStorage and exposes `hasNote(date)` so the calendar grid
- * can display a subtle indicator on dates that already have notes.
- *
- * `refreshTrigger` should be incremented by the parent whenever a note is saved,
- * so the index stays in sync without a full page reload.
- */
+/** Scans localStorage; exposes `hasNote(date)` for the dot/underline indicator. */
 export function useNotesIndex(
   viewYear: number,
   viewMonth: number,
@@ -56,38 +55,83 @@ export function useNotesIndex(
     const marked = new Set<string>();
     try {
       for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (!key?.startsWith('notes-range-')) continue;
-
-        const val = localStorage.getItem(key);
+        const k = localStorage.key(i);
+        if (!k?.startsWith('notes-range-')) continue;
+        const val = localStorage.getItem(k);
         if (!val?.trim()) continue;
 
-        // Key format: notes-range-YYYY-M-D-YYYY-M-D
-        // Remove prefix then split on '-'
-        const parts = key.replace('notes-range-', '').split('-');
+        const parts = k.replace('notes-range-', '').split('-');
         if (parts.length < 6) continue;
-
         const [sy, sm, sd, ey, em, ed] = parts.map(Number);
         if ([sy, sm, sd, ey, em, ed].some(isNaN)) continue;
 
         const start = new Date(sy, sm, sd);
         const end   = new Date(ey, em, ed);
         const cur   = new Date(start);
-
-        while (cur <= end) {
-          marked.add(toKey(cur));
-          cur.setDate(cur.getDate() + 1);
-        }
+        while (cur <= end) { marked.add(toKey(cur)); cur.setDate(cur.getDate() + 1); }
       }
-    } catch { /* localStorage unavailable */ }
-
+    } catch {}
     setDatesWithNotes(marked);
   }, [viewYear, viewMonth, refreshTrigger]);
 
-  const hasNote = useCallback(
-    (date: Date) => datesWithNotes.has(toKey(date)),
-    [datesWithNotes],
-  );
+  return { hasNote: useCallback((d: Date) => datesWithNotes.has(toKey(d)), [datesWithNotes]) };
+}
 
-  return { hasNote };
+/** A single saved note entry (for the notes list). */
+export interface NoteEntry {
+  key: string;
+  label: string;
+  note: string;
+  sortDate: number; // timestamp for sorting (newest first)
+}
+
+function fmtFull(d: Date) {
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+/** Reads ALL saved notes from localStorage and returns them sorted newest→oldest. */
+export function useAllNotes(refreshTrigger: number) {
+  const [entries, setEntries] = useState<NoteEntry[]>([]);
+
+  const reload = useCallback(() => {
+    const found: NoteEntry[] = [];
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k?.startsWith('notes-range-')) continue;
+        const val = localStorage.getItem(k);
+        if (!val?.trim()) continue;
+
+        const parts = k.replace('notes-range-', '').split('-');
+        if (parts.length < 6) continue;
+        const [sy, sm, sd, ey, em, ed] = parts.map(Number);
+        if ([sy, sm, sd, ey, em, ed].some(isNaN)) continue;
+
+        const start = new Date(sy, sm, sd);
+        const end   = new Date(ey, em, ed);
+
+        let label: string;
+        if (toKey(start) === toKey(end)) {
+          label = fmtFull(start);
+        } else {
+          const days = Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
+          label = `${fmtFull(start)} – ${fmtFull(end)} · ${days} days`;
+        }
+
+        found.push({ key: k, label, note: val, sortDate: start.getTime() });
+      }
+    } catch {}
+
+    found.sort((a, b) => b.sortDate - a.sortDate);
+    setEntries(found);
+  }, []);
+
+  useEffect(() => { reload(); }, [reload, refreshTrigger]);
+
+  const deleteByKey = useCallback((k: string) => {
+    try { localStorage.removeItem(k); } catch {}
+    reload();
+  }, [reload]);
+
+  return { entries, deleteByKey };
 }

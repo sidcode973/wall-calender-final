@@ -40,11 +40,7 @@ export function useCalendar() {
     });
   }, []);
 
-  /**
-   * Auto selection:
-   *  - No start OR range already complete → begin fresh selection (1st click)
-   *  - Start exists, no end → finalise range; auto-swap if end < start (2nd click)
-   */
+  /** First click starts selection; second click finalises the range (auto-swaps if reversed). */
   const handleDayClick = useCallback((date: Date) => {
     setState(s => {
       if (!s.startDate || (s.startDate && s.endDate)) {
@@ -56,21 +52,32 @@ export function useCalendar() {
     });
   }, []);
 
-  /** Show live hover-preview while waiting for the 2nd click. */
+  /** Live hover preview while waiting for the second click. */
   const handleDayHover = useCallback((date: Date) => {
-    setState(s => {
-      if (s.startDate && !s.endDate) return { ...s, hoverDate: date };
-      return s;
-    });
+    setState(s => s.startDate && !s.endDate ? { ...s, hoverDate: date } : s);
   }, []);
 
-  /** Clear the hover preview when the pointer leaves the grid. */
   const clearHover = useCallback(() => {
-    setState(s => (s.hoverDate ? { ...s, hoverDate: null } : s));
+    setState(s => s.hoverDate ? { ...s, hoverDate: null } : s);
   }, []);
 
   const clearSelection = useCallback(() => {
     setState(s => ({ ...s, startDate: null, endDate: null, hoverDate: null }));
+  }, []);
+
+  /**
+   * Programmatically select a date range and navigate to the start month.
+   * Used when the user clicks a saved note in the All Notes list.
+   */
+  const setDateRange = useCallback((start: Date, end: Date) => {
+    setState(s => ({
+      ...s,
+      viewYear: start.getFullYear(),
+      viewMonth: start.getMonth(),
+      startDate: start,
+      endDate: end,
+      hoverDate: null,
+    }));
   }, []);
 
   const getDayState = useCallback((date: Date): {
@@ -78,9 +85,9 @@ export function useCalendar() {
   } => {
     const { startDate, endDate, hoverDate } = state;
     const effectiveEnd = startDate && !endDate && hoverDate ? hoverDate : endDate;
-    const isStart = !!startDate && toKey(date) === toKey(startDate);
-    const isEnd   = !!effectiveEnd && toKey(date) === toKey(effectiveEnd);
-    let isInRange = false;
+    const isStart  = !!startDate && toKey(date) === toKey(startDate);
+    const isEnd    = !!effectiveEnd && toKey(date) === toKey(effectiveEnd);
+    let isInRange  = false;
     if (startDate && effectiveEnd) {
       const lo = startDate < effectiveEnd ? startDate : effectiveEnd;
       const hi = startDate < effectiveEnd ? effectiveEnd : startDate;
@@ -92,5 +99,6 @@ export function useCalendar() {
   return {
     state, prevMonth, nextMonth,
     handleDayClick, handleDayHover, clearHover, clearSelection, getDayState,
+    setDateRange,
   };
 }

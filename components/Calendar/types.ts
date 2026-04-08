@@ -1,3 +1,5 @@
+import type { Holiday } from '@/lib/holidays';
+
 /** Data shape for a single calendar grid cell. */
 export interface CellData {
   day: number;
@@ -12,6 +14,8 @@ export interface CellData {
   isEnd: boolean;
   isInRange: boolean;
   isToday: boolean;
+  /** Indian holiday on this date, or null. */
+  holiday: Holiday | null;
   /** True when localStorage contains a note covering this date. */
   noteOnDate: boolean;
 }
