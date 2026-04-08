@@ -6,31 +6,20 @@ A beautiful, fully interactive wall calendar built with **Next.js 14**, **TypeSc
 
 ## ✨ Features
 
-### 📅 Calendar
-- **Fixed 42-cell grid** — always 6 rows × 7 columns, no layout shift between months
-- **Hotel-style range selection** — click a start date, hover to preview, click an end date. Pill-shaped highlight band with rounded ends
-- **Today highlighted** — current date always marked with an accent circle
-- **Click outside to clear** — clicking anywhere outside the calendar deselects the date range
+### Core
+- **Wall Calendar Aesthetic** — spiral binding, hero image, chevron divider, month/year badge
+- **Day Range Selector** — click start → hover preview → click end. Visual states for start, in-range, and end
+- **Single Day Mode** — toggle between range and single-day selection
+- **Integrated Notes** — per-date-range notes persisted in `localStorage`
+- **Fully Responsive** — two-panel desktop layout, stacked mobile layout
 
-### 🎉 Indian Holidays
-- **70+ holidays** for 2026 across all 12 months
-- **Hover tooltip** on each holiday showing its name and type
-
-### 📝 Notes
-- **Per date-range notes** — each selected range gets its own note
-- **Submit to save** — notes only save when you click Submit (not on every keystroke)
-- **Clears selection after submit** — calendar resets to a clean state automatically
-- **All Notes panel** — scrollable list of all saved notes at the bottom of the card
-- **Click any note** — instantly navigates the calendar to that date range and re-selects it
-- **Delete individual notes** — remove any note with the trash icon
-- **Stored in localStorage** — notes persist across page refreshes and browser restarts
-
-### 🎨 Design & UX
-- **Dynamic theme colors** — accent color is extracted from each month's Unsplash hero image using a canvas pixel sampler. Navigation buttons, highlights, and range bands all update live as you switch months
-- **Diagonal hero image** — CSS `clip-path` creates a slanted cut on the left panel (desktop), V-notch on mobile
-- **Slide-up notes overlay** — clicking Expand smoothly slides the notes list up over the calendar without resizing the card
-- **Bold, readable typography** — Playfair Display for headings, DM Sans for body text
-- **Fully responsive** — two-panel layout on desktop, stacked on mobile
+### Extra Features
+- **Auto Theme Color** — dominant color is extracted from each month's hero image using a canvas-based pixel sampler. The accent, range highlight, and cell colors all update live when you navigate months
+- **Holiday Markers** — colored dots on dates with hover tooltips:
+  - 🔴 **Red** — Indian national holidays (Republic Day, Independence Day, Gandhi Jayanti, etc.)
+  - 🟠 **Orange** — Religious & cultural (Holi, Diwali, Eid, Christmas, etc.)
+  - 🟢 **Green** — International days (Women's Day, Earth Day, Yoga Day, etc.)
+- **Dark / Light Mode** — toggle in the toolbar, uses `next-themes` with system preference detection
 
 ---
 
